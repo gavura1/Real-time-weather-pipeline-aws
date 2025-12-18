@@ -1,0 +1,5 @@
+OPENWEATHER_API_KEY = "2c9acc314cc84278cafa0f76f41a9d87"
+OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+OPENWEATHER_UNITS = "metric"
+OPENWEATHER_LANG = "en"
+WEATHER_TTL_SECONDS = 300
