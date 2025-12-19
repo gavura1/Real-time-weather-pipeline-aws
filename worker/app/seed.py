@@ -1,6 +1,7 @@
 import redis 
 import json 
 from core.models import WeatherData
+from core.config import REDIS_HOST, REDIS_PORT, REDIS_DB
 
 host = "localhost" 
 port = 6379 
@@ -18,7 +19,7 @@ time_stamp="2025-12-04T14:00:00Z",
 is_stale=False 
 )
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0)
+redis_client = redis.Redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 data = weather.model_dump() 
 json_value = json.dumps(data) 

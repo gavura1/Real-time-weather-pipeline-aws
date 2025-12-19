@@ -1,0 +1,27 @@
+services:
+  redis:
+    image: redis
+  backend:
+    build: ./backend
+
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+
+    ports:
+      - "8000:8000"
+
+  worker:
+    build: ./worker
+
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      OPENWEATHER_BASE_URL: ${OPENWEATHER_BASE_URL}
+      OPENWEATHER_UNITS: ${OPENWEATHER_UNITS}
+      OPENWEATHER_LANG: ${OPENWEATHER_LANG}
+      WEATHER_TTL_SECONDS: ${WEATHER_TTL_SECONDS}
+      FETCH_INTERVAL_SECONDS: ${FETCH_INTERVAL_SECONDS}
