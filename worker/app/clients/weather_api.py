@@ -1,4 +1,5 @@
 import requests
+import time
 from core.models import WeatherData
 from core.config import OPENWEATHER_API_KEY, OPENWEATHER_BASE_URL, OPENWEATHER_LANG, OPENWEATHER_UNITS
 from datetime import datetime, timezone
@@ -30,6 +31,7 @@ def fetch_current_weather(city: str) -> WeatherData | None:
         temp_unit = "°C",
         wind_unit = "km/h",
         time_stamp = datetime.fromtimestamp(data["dt"], tz=timezone.utc).isoformat(),
+        stored_at = int(time.time()),
         is_stale = False
     )
     return weather

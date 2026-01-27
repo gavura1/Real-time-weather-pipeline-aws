@@ -1,5 +1,6 @@
 # Pytnon cache
 __pycache__/
+.pytest_cache/
 *.pyc 
 
 # Virtual environment
@@ -7,6 +8,7 @@ __pycache__/
 
 # OS metadata
 .DS_Store
+__MACOSX/
 
 # Editor configs
 .vscode/

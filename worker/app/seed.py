@@ -16,6 +16,7 @@ wind="11 - 30",
 temp_unit="°C", 
 wind_unit="km/h", 
 time_stamp="2025-12-04T14:00:00Z", 
+stored_at="1135",
 is_stale=False 
 )
 

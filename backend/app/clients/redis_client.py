@@ -20,4 +20,16 @@ class RedisClient:
 
         return model
 
-        
+    def get_last_good_weather(self, city: str) -> WeatherData | None:
+        key = f"weather:{city}:last_good"
+
+        raw = self.client.get(key)
+
+        if raw is None:
+            return None
+        else:
+            decoded = raw.decode("utf-8")
+            data = json.loads(decoded)
+            model = WeatherData(**data)
+
+        return model

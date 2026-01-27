@@ -14,4 +14,5 @@ def run_weather_job(city: str, redis_client: RedisClient) -> None:
         dict_data = result.model_dump()
         json_value = json.dumps(dict_data)
         redis_client.set_current_weather(city, json_value, WEATHER_TTL_SECONDS)
+        redis_client.set_last_good_weather(city, json_value)
 

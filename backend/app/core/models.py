@@ -9,4 +9,5 @@ class WeatherData(BaseModel):
     temp_unit: str
     wind_unit: str
     time_stamp: str
+    stored_at: int
     is_stale: bool
