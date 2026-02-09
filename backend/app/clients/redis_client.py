@@ -33,3 +33,9 @@ class RedisClient:
             model = WeatherData(**data)
 
         return model
+    
+    def ping(self) -> bool:
+        return bool(self.client.ping())
+    
+    def exists(self, key: str) -> bool:
+        return self.client.exists(key) == 1
