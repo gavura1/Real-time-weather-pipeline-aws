@@ -61,6 +61,23 @@ jobs:
           echo "Backend did not become ready in time"
           docker compose logs backend 
           exit 1
+
+      - name: Wait for worker to produce weather data
+        run: |
+          CITY="Banska%20Bystrica"
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8000/weather/current?city=?{CITY}")
+            if [ "$code" = "200" ]; then
+              echo "Worker data available (200)"
+              exit 0
+            fi
+            echo "Waiting for worker data (got HTTP $code)"
+            sleep 2
+          done
+          echo "Worker did not produce data in time"
+          docker compose logs worker
+          docker compose logs backend
+          exit 1
     
       - name: Smoke test endpoints
         run: |
