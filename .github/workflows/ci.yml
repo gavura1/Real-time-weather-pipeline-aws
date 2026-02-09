@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  tests:
+    name: Backend tests (pytest in Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker compose build backend
+
+      - name: Run pytest
+        run: docker compose run --rm backend pytest -q
+
+  full-stack-smoke:
+    name: Full stack smoke (compose up + curl)
+    runs-on: ubuntu-latest
+    needs: tests
+
+    env:
+      # Secrets
+      OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY}}
+      OPENWEATHER_BASE_URL: ${{ secrets.OPENWEATHER_BASE_URL}}
+
+      OPENWEATHER_UNITS: metric
+      OPENWEATHER_LANG: en
+      WEATHER_TTL_SECONDS: "300"
+      FETCH_INTERVAL_SECONDS: "5"
+
+      REDIS_HOST: redis 
+      REDIS_PORT: "6379"
+      REDIS_DB: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 
+
+      - name: Build images
+        run: docker compose build 
+
+      - name: Start stack 
+        run: docker compose up -d
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do 
+            if curl -fsS http://localhost:8000/health > /dev/null; then
+              echo "Backend is up"
+              exit 0
+            fi 
+            echo "Waiting for backend"
+            sleep 2
+          done
+          echo "Backend did not become ready in time"
+          docker compose logs backend 
+          exit 1
+    
+      - name: Smoke test endpoints
+        run: |
+          curl -fsS http://localhost:8000/health
+          curl -fsS http://localhost:8000/metrics | head -n 50
+          curl -fsS "http://localhost:8000/weather/status?city=Banska%20Bystrica" | head -n 50
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs 
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v 
