@@ -73,7 +73,7 @@ jobs:
           echo "Probing URL: ${URL}"
 
           for i in {1..30}; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "${RUL}" || echo "000")
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${URL}" || echo "000")
             if [ "$code" = "200" ]; then
               echo "Worker data available (200)"
               exit 0
