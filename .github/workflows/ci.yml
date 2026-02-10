@@ -55,7 +55,7 @@ jobs:
       - name: Wait for backend
         run: |
           for i in {1..30}; do 
-            if curl -fsS http://backend:8000/health > /dev/null; then
+            if curl -fsS http://localhost:8000/health > /dev/null; then
               echo "Backend is up"
               exit 0
             fi 
@@ -69,7 +69,7 @@ jobs:
       - name: Wait for worker to produce weather data
         run: |
           CITY="Banska%20Bystrica"
-          URL="http://backend:8000/weather/current?city=${CITY}"
+          URL="http://localhost:8000/weather/current?city=${CITY}"
           echo "Probing URL: ${URL}"
 
           for i in {1..30}; do
@@ -89,9 +89,9 @@ jobs:
     
       - name: Smoke test endpoints
         run: |
-          curl -fsS http://backend:8000/health
-          curl -fsS http://backend:8000/metrics | head -n 50
-          curl -fsS "http://backend:8000/weather/status?city=Banska%20Bystrica" | head -n 50
+          curl -fsS http://localhost:8000/health
+          curl -fsS http://localhost:8000/metrics | head -n 50
+          curl -fsS "http://localhost:8000/weather/status?city=Banska%20Bystrica" | head -n 50
 
       - name: Show logs on failure
         if: failure()
