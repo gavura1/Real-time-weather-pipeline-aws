@@ -29,9 +29,3 @@ services:
       OPENWEATHER_LANG: ${OPENWEATHER_LANG:-en}
       WEATHER_TTL_SECONDS: ${WEATHER_TTL_SECONDS:-300}
       FETCH_INTERVAL_SECONDS: ${FETCH_INTERVAL_SECONDS:-60}
-
-  curl:
-    image: curlimages/curl:8.6.0
-    entrypoint: ["sleep", "3600"]
-    depends_on:
-      - backend
