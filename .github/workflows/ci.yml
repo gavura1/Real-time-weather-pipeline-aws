@@ -69,7 +69,7 @@ jobs:
           echo "Probing URL: ${URL}"
 
           for i in {1..30}; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "${RUL}")
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${RUL}" || echo "000")
             if [ "$code" = "200" ]; then
               echo "Worker data available (200)"
               exit 0
@@ -77,7 +77,7 @@ jobs:
             echo "Waiting for worker data (got HTTP $code)"
             sleep 2
           done
-          
+
           echo "Worker did not produce data in time"
           docker compose logs worker
           docker compose logs backend
