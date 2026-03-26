@@ -3,6 +3,9 @@ import time
 from core.models import WeatherData
 from core.config import OPENWEATHER_API_KEY, OPENWEATHER_BASE_URL, OPENWEATHER_LANG, OPENWEATHER_UNITS
 from datetime import datetime, timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 def fetch_current_weather(city: str) -> WeatherData | None:
     params = {
@@ -12,9 +15,14 @@ def fetch_current_weather(city: str) -> WeatherData | None:
         "lang": OPENWEATHER_LANG
     }
 
-    response = requests.get(OPENWEATHER_BASE_URL, params=params)
+    try:
+        response = requests.get(OPENWEATHER_BASE_URL, params=params)
+    except requests.RequestException:
+        logger.exception("OpenWeather request failed for city=%s", city)
+        return None
 
     if response.status_code != 200:
+        logger.warning("OpenWeather returned non-200 response for city=%s status=%s body=%s", city, response.status_code, response.text)
         return None
     
     data = response.json()
@@ -34,5 +42,7 @@ def fetch_current_weather(city: str) -> WeatherData | None:
         stored_at = int(time.time()),
         is_stale = False
     )
+
+    logger.info("OpenWeather fetch succeeded for city=%s location=%s", city, weather.location)
     return weather
         

@@ -1,3 +1,4 @@
+import logging
 import time
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, HTTPException
@@ -6,6 +7,7 @@ from app.services.weather_service import get_current_weather, get_last_good_weat
 from app.core.config import REDIS_HOST, REDIS_PORT, REDIS_DB, STALE_AFTER_SECONDS, MAX_AGE_SECONDS
 from app.core.metrics import HTTP_REQUEST_TOTAL, WEATHER_CACHE_SOURCE_TOTAL, HTTP_REQUEST_DURATION_SECONDS 
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_DB)
@@ -17,19 +19,23 @@ def weather_current(city: str):
     endpoint_label = "weather_current"
 
     HTTP_REQUEST_TOTAL.labels(endpoint=endpoint_label).inc()
+    logger.info("Weather current requested for city=%s", city)
 
     source = "none"
     try:
         result = get_current_weather(city, redis_client)
         if result is not None:
             source = "current"
+            logger.info("using current weather cache for city=%s", city)
         else:
             result = get_last_good_weather(city, redis_client)
             if result is not None:
                 source = "last_good"
+                logger.warning("using last_good fallback for city=%s", city)
     
         if result is None:
             WEATHER_CACHE_SOURCE_TOTAL.labels(source=source).inc()
+            logger.error("Weather data unavailable for city=%s", city)
             raise HTTPException(status_code=503, detail="Weather data unavailable")
 
         now = int(time.time())
@@ -37,8 +43,12 @@ def weather_current(city: str):
 
         result.is_stale = age > STALE_AFTER_SECONDS
 
+        logger.info(
+            "Weather data age checked for city=%s source=%s, age=%s, stale=%s", city, source, age, result.is_stale)
+
         if age > MAX_AGE_SECONDS:
             WEATHER_CACHE_SOURCE_TOTAL.labels(source=source).inc()
+            logger.error("weather data too old for city=%s source=%s age=%s", city, source, age)
             raise HTTPException(status_code=503, detail="Weather data too old")
     
         WEATHER_CACHE_SOURCE_TOTAL.labels(source=source).inc()
@@ -46,6 +56,7 @@ def weather_current(city: str):
     finally:
         duration = time.perf_counter() - start
         HTTP_REQUEST_DURATION_SECONDS.labels(endpoint=endpoint_label).observe(duration)
+        logger.info("Weather current finished for city=%s in %.4f seconds", city, duration)
 
 @router.get("/weather/status")
 def weather_status(city: str):
@@ -54,6 +65,7 @@ def weather_status(city: str):
     endpoint_label = "weather_status"
 
     HTTP_REQUEST_TOTAL.labels(endpoint=endpoint_label).inc()
+    logger.info("Weather status requested for city=%s", city)
 
     try:
         try:
@@ -63,6 +75,7 @@ def weather_status(city: str):
             last_good = redis_client.get_last_good_weather(city)
 
         except Exception:
+            logger.exception("Redis error during weather status check for city=%s", city)
             return JSONResponse(status_code=503, content={"redis": "error"})
 
         current_exists = current is not None
@@ -92,6 +105,8 @@ def weather_status(city: str):
         else:
             is_stale = age_seconds > STALE_AFTER_SECONDS
 
+        logger.info("Weather status result city=%s source=%s current_exists=%s last_good_exists=%s age_seconds=%s", city, source, current_exists, last_good_exists, age_seconds)
+
         return {
             "city": city,
             "redis": "ok",
@@ -106,6 +121,7 @@ def weather_status(city: str):
     finally:
         duration = time.perf_counter() - start
         HTTP_REQUEST_DURATION_SECONDS.labels(endpoint=endpoint_label).observe(duration)
+        logger.info("Weather status finished for city=%s in %.4f seconds", city, duration)
 
     
     
