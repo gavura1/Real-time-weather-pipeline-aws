@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Pipeline</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+  <div class="app">
+    <div class="status-bar" id="status-bar">
+      <span class="badge">Načítavam...</span>
+    </div>
+
+    <div id="weather-content" class="loading-card">
+      <i class="ti ti-cloud"></i>
+      <p>Načítavam počasie...</p>
+    </div>
+
+    <div class="footer">
+      <span id="last-updated"></span>
+      <button onclick="loadWeather()">
+        <i class="ti ti-refresh"></i> Obnoviť
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
