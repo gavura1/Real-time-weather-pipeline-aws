@@ -13,7 +13,7 @@ redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_DB)
 @router.get("/health")
 def health():
     logger.info("Health check requested")
-    return {"status": "OK", "version": "1.0.0"}
+    return {"status": "ok", "version": "1.0.0"}
 
 @router.get("/ready")
 def ready():
