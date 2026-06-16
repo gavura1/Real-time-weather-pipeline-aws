@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'http://weather-alb-1718868960.eu-central-1.elb.amazonaws.com';
 const CITY = 'Banska Bystrica';
 
 function getIcon(temp, description) {

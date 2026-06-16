@@ -1,6 +1,30 @@
 # Real-time Weather Data Pipeline
 
-A production-ready backend system that fetches, caches, and serves real-time weather data via a REST API. Built with a focus on observability, reliability, and cloud-native deployment.
+A production-ready backend system that fetches, caches, and serves real-time weather data via a REST API. Built with a focus on observability, reliability, and cloud-native deployment on AWS ECS Fargate.
+
+## Live Demo (AWS Deployment)
+
+> The infrastructure was provisioned on AWS ECS Fargate, validated, and subsequently torn down to avoid ongoing costs. Screenshots below are from the live deployment.
+
+### Frontend — deployed on AWS ECS
+![Frontend AWS](Screens/08_Frontend_AWS.png)
+
+### AWS ECS Cluster — 3 services running
+![ECS Cluster](Screens/09_ECS_Cluster_and_Services.png)
+
+### CloudWatch Logs — structured logging from backend
+![CloudWatch Logs](Screens/13_CLoudWatch_Backend_Logs.png)
+
+### Container Insights — CPU & memory monitoring
+![Container Insights](Screens/14_Container_Insight.png)
+
+### Grafana Dashboard — request metrics and latency
+![Grafana Dashboard](Screens/06_Grafana_dashboard.png)
+
+### Prometheus — scraping backend metrics
+![Prometheus](Screens/07_Prometheus_targets.png)
+
+---
 
 ## Architecture
 
@@ -41,7 +65,7 @@ A production-ready backend system that fetches, caches, and serves real-time wea
 | Frontend | HTML, CSS, JavaScript, Nginx |
 | Containerization | Docker, Docker Compose |
 | CI/CD | GitHub Actions |
-| Cloud | AWS ECS Fargate, ECR, ElastiCache, CloudWatch |
+| Cloud | AWS ECS Fargate, ECR, ElastiCache, CloudWatch, ALB |
 | Monitoring | Prometheus, Grafana, CloudWatch Container Insights |
 
 ## Features
@@ -53,6 +77,7 @@ A production-ready backend system that fetches, caches, and serves real-time wea
 - Prometheus metrics exposed at `/metrics`
 - Structured JSON logging throughout backend and worker
 - Full observability: Prometheus scraping, Grafana dashboard, CloudWatch logging
+- CloudWatch Container Insights for CPU/memory monitoring per container
 - Automated CI pipeline with pytest and Docker Compose smoke tests
 - CD pipeline that builds, pushes to ECR and deploys to ECS on every push to main
 
@@ -93,6 +118,8 @@ A production-ready backend system that fetches, caches, and serves real-time wea
 │   └── provisioning/     # Datasource + dashboard provisioning
 ├── prometheus.yml         # Prometheus scrape config
 ├── docker-compose.yaml
+├── scripts/
+│   └── smoke_test.sh     # Post-deploy smoke test script
 └── .github/
     └── workflows/
         ├── ci.yml         # CI: pytest + smoke tests
@@ -150,6 +177,7 @@ docker compose run --rm backend pytest -v
 | `REDIS_HOST` | `redis` | Redis hostname |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_DB` | `0` | Redis database index |
+| `REDIS_SSL` | `false` | Enable SSL for ElastiCache |
 | `OPENWEATHER_API_KEY` | — | OpenWeatherMap API key (required) |
 | `OPENWEATHER_BASE_URL` | — | OpenWeatherMap base URL (required) |
 | `OPENWEATHER_UNITS` | `metric` | Temperature units |
@@ -165,15 +193,24 @@ docker compose run --rm backend pytest -v
 
 The application is designed for AWS ECS Fargate deployment with the following infrastructure:
 
-- **ECR** — Docker image registry for backend, worker and frontend images
-- **ECS Fargate** — Serverless container orchestration (backend + worker services)
-- **ElastiCache (Redis)** — Managed Redis in private subnet
-- **CloudWatch** — Centralized logging via `awslogs` log driver
-- **CloudWatch Container Insights** — CPU, memory and network metrics per container
-- **CloudWatch Alarms** — Alerting on error rates and unhealthy containers
-- **Application Load Balancer** — Public entry point routing to backend service
+| Service | Purpose |
+|---------|---------|
+| **ECR** | Docker image registry for backend, worker and frontend images |
+| **ECS Fargate** | Serverless container orchestration |
+| **ElastiCache (Redis)** | Managed Redis cache |
+| **Application Load Balancer** | Public entry point with stable DNS |
+| **CloudWatch Logs** | Centralized logging via `awslogs` log driver |
+| **CloudWatch Container Insights** | CPU, memory and network metrics per container |
 
-> **Note on live deployment:** The AWS infrastructure has been provisioned and validated. The deployment is currently stopped to avoid ongoing costs. Screenshots from the live AWS environment (ECS console, CloudWatch logs, Grafana dashboard) will be added to this repository shortly.
+### AWS Infrastructure Screenshots
+
+| ECR Repositories | ElastiCache Redis | Load Balancer |
+|:---:|:---:|:---:|
+| ![ECR](Screens/10_ECR.png) | ![ElastiCache](Screens/11_ElastiCache.png) | ![ALB](Screens/15_ALB.png) |
+
+| CloudWatch Log Groups |
+|:---:|
+| ![Log Groups](Screens/12_CloudWatch_Log_Groups.png) |
 
 ## CI/CD Pipeline
 
@@ -195,9 +232,7 @@ The application is designed for AWS ECS Fargate deployment with the following in
 - **Prometheus** scrapes `/metrics` every 15 seconds
 - **Grafana** dashboard shows request rate, p50/p95 latency, cache source distribution
 - **CloudWatch** receives all container logs via `awslogs` driver
-- **CloudWatch Alarms** notify on backend errors and ECS task failures
-
-> Screenshots from Grafana dashboard and CloudWatch will be added after the AWS deployment session.
+- **CloudWatch Container Insights** monitors CPU, memory and network per container
 
 ## Author
 

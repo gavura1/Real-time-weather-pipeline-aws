@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-app.include_router(weather_router)
-app.include_router(health_router)
-app.include_router(metric_router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+app.include_router(weather_router)
+app.include_router(health_router)
+app.include_router(metric_router)
 
 logger.info("Backend application started")
 
