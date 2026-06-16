@@ -227,6 +227,12 @@ The application is designed for AWS ECS Fargate deployment with the following in
 3. Waits for services to stabilize
 4. Runs smoke test against the live AWS URL
 
+### CI/CD Pipeline Screenshots
+
+| CI — automated tests on every push | CD — automated deploy to AWS ECS |
+|:---:|:---:|
+| ![CI Pipeline](Screens/16_Github_CI.png) | ![CD Pipeline](Screens/17_Github_CD.png) |
+
 ## Monitoring
 
 - **Prometheus** scrapes `/metrics` every 15 seconds
